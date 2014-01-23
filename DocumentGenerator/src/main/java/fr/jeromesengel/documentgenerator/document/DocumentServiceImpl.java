@@ -8,6 +8,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.apache.log4j.Logger;
+import org.docx4j.jaxb.Context;
+import org.docx4j.openpackaging.contenttype.ContentType;
+import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.openpackaging.parts.PartName;
+import org.docx4j.openpackaging.parts.WordprocessingML.AlternativeFormatInputPart;
+import org.docx4j.relationships.Relationship;
+import org.docx4j.wml.CTAltChunk;
 import org.springframework.stereotype.Service;
 
 import com.itextpdf.text.Document;
@@ -16,7 +23,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.tool.xml.XMLWorkerHelper;
 
 import fr.jeromesengel.documentgenerator.common.ExportType;
-import fr.jeromesengel.documentgenerator.utils.HeaderAndFooter;
+import fr.jeromesengel.documentgenerator.utils.PdfPageEvent;
 
 @Service
 public class DocumentServiceImpl implements DocumentService {
@@ -62,8 +69,7 @@ public class DocumentServiceImpl implements DocumentService {
 			PdfWriter writer = PdfWriter.getInstance(document, outputStream);
 			writer.setBoxSize("art", new Rectangle(36, 54, 559, 788));
 			writer.setPageEmpty(true);
-			HeaderAndFooter event = new HeaderAndFooter("DEC133017DGDS");
-			writer.setPageEvent(event);
+			writer.setPageEvent(new PdfPageEvent("DEC133017DGDS", "Ippon Technologies", 1));
 
 			document.open();
 			document.newPage();
@@ -84,5 +90,10 @@ public class DocumentServiceImpl implements DocumentService {
 		}
 
 		return file;
+	}
+
+	public File generateDoc(String html, String filename) {
+		// Not implemented yet
+		return null;
 	}
 }
