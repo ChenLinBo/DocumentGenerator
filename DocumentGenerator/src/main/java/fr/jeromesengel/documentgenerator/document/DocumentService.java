@@ -1,9 +1,9 @@
 package fr.jeromesengel.documentgenerator.document;
 
-import java.io.File;
+import java.io.OutputStream;
 
 import fr.jeromesengel.documentgenerator.common.ExportType;
 
 public interface DocumentService {
-	File generateDocument(String html, String filename, ExportType exportType);
+	OutputStream generateDocument(String html, ExportType exportType);
 }

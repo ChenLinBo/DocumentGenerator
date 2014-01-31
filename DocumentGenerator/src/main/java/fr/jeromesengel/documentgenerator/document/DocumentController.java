@@ -1,11 +1,12 @@
 package fr.jeromesengel.documentgenerator.document;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.ByteArrayOutputStream;
 
 import javax.inject.Inject;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,17 +28,26 @@ public class DocumentController {
 		return Page.DOCUMENT.getView();
 	}
 
-	@RequestMapping(value = "/", method = RequestMethod.POST, produces = "application/pdf")
+	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseBody
-	public byte[] getFile(@RequestParam(value = "html") String html, @RequestParam(value = "extension") String extension) throws IOException {
-		ExportType exportType = ExportType.valueOf(extension);
-		File file = documentService.generateDocument(html, "document" + extension, exportType);
+	public ResponseEntity<byte[]> getFile(@RequestParam(value = "html") String html, @RequestParam(value = "extension") String extension) {
+		ExportType exportType = null;
 
-		if (file != null) {
-			return Files.readAllBytes(file.toPath());
+		try {
+			exportType = ExportType.valueOf(extension);
+		} catch (IllegalArgumentException | NullPointerException e) {
+			return new ResponseEntity<byte[]>(HttpStatus.BAD_REQUEST);
+		}
+
+		ByteArrayOutputStream byteArrayOutputStream = (ByteArrayOutputStream) documentService.generateDocument(html, exportType);
+
+		if (byteArrayOutputStream != null) {
+			HttpHeaders headers = new HttpHeaders();
+			headers.add("Content-Type", exportType.getContentType());
+			headers.add("Content-Disposition", "attachment; filename=\"document." + exportType.getExtension() + "\"");
+			return new ResponseEntity<byte[]>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
 		} else {
-			return null;
+			return new ResponseEntity<byte[]>(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
 		}
 	}
-
 }
